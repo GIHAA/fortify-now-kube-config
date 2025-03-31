@@ -8,10 +8,10 @@ gateway:
     repository: gihaa/as-gateway
     tag: latest
   service:
-    type: NodePort       
-    port: 80       
-    targetPort: 3000     
-    nodePort: 31000    
+    type: NodePort  # Keeping NodePort for the gateway (optional if you also want it public)
+    port: 80
+    targetPort: 3000
+    nodePort: 31000
 
 userService:
   name: user-service
@@ -20,8 +20,10 @@ userService:
     repository: gihaa/fortify-now-auth-service
     tag: latest
   service:
-    type: ClusterIP
+    type: NodePort  # Change this from ClusterIP to NodePort to expose it publicly
     port: 3001
+    targetPort: 3001
+    nodePort: 32000  # Set this port to be accessed publicly
 
 database:
   user: "avnadmin"

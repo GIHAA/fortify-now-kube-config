@@ -1,0 +1,198 @@
+Directory structure:
+└── assignment1/fortify-now-kube-config/
+    ├── argocd/
+    │   └── applications/
+    │       └── microservices.yaml
+    └── helm/
+        └── microservices/
+            ├── Chart.yaml
+            ├── templates/
+            │   ├── services.yaml
+            │   ├── user-service-deployment.yaml
+            │   └── gateway-deployment.yaml
+            └── values.yaml
+
+================================================
+File: /argocd/applications/microservices.yaml
+================================================
+# argocd/applications/microservices.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: fortify
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/GIHAA/fortify-now-kube-config.git'
+    path: helm/microservices
+    targetRevision: HEAD
+    helm:
+      valueFiles:
+        - values.yaml
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: fortify
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+
+================================================
+File: /helm/microservices/Chart.yaml
+================================================
+# helm/microservices/Chart.yaml
+apiVersion: v2
+name: agri-sync
+description: Helm chart for fortify microservices
+version: 0.1.0
+type: application
+
+================================================
+File: /helm/microservices/templates/services.yaml
+================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.gateway.name }}
+spec:
+  type: {{ .Values.gateway.service.type }}
+  ports:
+    - port: {{ .Values.gateway.service.port }}
+      targetPort: {{ .Values.gateway.service.targetPort }}
+  selector:
+    app: {{ .Values.gateway.name }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.userService.name }}
+spec:
+  type: {{ .Values.userService.service.type }}
+  ports:
+    - port: {{ .Values.userService.service.port }}
+      targetPort: 3001
+  selector:
+    app: {{ .Values.userService.name }}
+
+================================================
+File: /helm/microservices/templates/user-service-deployment.yaml
+================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.userService.name }}
+spec:
+  replicas: {{ .Values.userService.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.userService.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.userService.name }}
+    spec:
+      containers:
+      - name: {{ .Values.userService.name }}
+        image: "{{ .Values.userService.image.repository }}:{{ .Values.userService.image.tag }}"
+        ports:
+        - containerPort: 3001
+        env:
+        - name: PORT
+          value: "3001"
+        - name: DB_HOST
+          value: {{ .Values.database.host | quote }}
+        - name: DB_PORT
+          value: {{ .Values.database.port | quote }}
+        - name: DB_NAME
+          value: {{ .Values.database.name | quote }}
+        - name: DB_USER
+          value: {{ .Values.database.user | quote }}
+        - name: DB_PASSWORD
+          value: {{ .Values.database.password | quote }}
+        - name: JWT_SECRET
+          value: {{ .Values.jwt.secret | quote }}
+        - name: JWT_EXPIRES_IN
+          value: {{ .Values.jwt.expiresIn | quote }}
+        - name: DB_SSL
+          value: "true"
+        - name: DB_SSL_REJECT_UNAUTHORIZED
+          value: "false"
+
+
+================================================
+File: /helm/microservices/templates/gateway-deployment.yaml
+================================================
+# helm/microservices/templates/gateway-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.gateway.name }}
+spec:
+  replicas: {{ .Values.gateway.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.gateway.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.gateway.name }}
+    spec:
+      containers:
+        - name: {{ .Values.gateway.name }}
+          image: "{{ .Values.gateway.image.repository }}:{{ .Values.gateway.image.tag }}"
+          ports:
+            - containerPort: 3000
+          env:
+            - name: PORT
+              value: "3000"
+            - name: USER_SERVICE_URL
+              value: "http://{{ .Values.userService.name }}:{{ .Values.userService.service.port }}"
+            - name: JWT_SECRET
+              value: {{ .Values.jwt.secret }}
+            - name: DB_SSL
+              value: "true"
+            - name: DB_SSL_REJECT_UNAUTHORIZED
+              value: "false"
+
+================================================
+File: /helm/microservices/values.yaml
+================================================
+global:
+  environment: development
+
+gateway:
+  name: api-gateway
+  replicaCount: 1
+  image:
+    repository: gihaa/as-gateway
+    tag: latest
+  service:
+    type: NodePort       
+    port: 80       
+    targetPort: 3000     
+    nodePort: 31000    
+
+userService:
+  name: user-service
+  replicaCount: 1
+  image:
+    repository: gihaa/fortify-now-auth-service
+    tag: latest
+  service:
+    type: ClusterIP
+    port: 3001
+
+database:
+  user: "avnadmin"
+  password: "AVNS_lP0uW9A3_MC4As3h-NL"
+  host: "pg-122ba407-gihansudeeparandimal-f684.g.aivencloud.com"
+  port: "17670"
+  name: "defaultdb"
+
+jwt:
+  secret: "your_jwt_secret"
+  expiresIn: "30d"
+
