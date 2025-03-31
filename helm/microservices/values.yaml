@@ -17,7 +17,7 @@ userService:
   name: user-service
   replicaCount: 1
   image:
-    repository: fortify-now-auth-service
+    repository: gihaa/fortify-now-auth-service
     tag: latest
   service:
     type: ClusterIP
