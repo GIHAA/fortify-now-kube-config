@@ -18,6 +18,6 @@ spec:
   type: {{ .Values.userService.service.type }}
   ports:
     - port: {{ .Values.userService.service.port }}
-      targetPort: 5000
+      targetPort: 3001
   selector:
     app: {{ .Values.userService.name }}
