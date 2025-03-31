@@ -1,41 +1,40 @@
-# helm/microservices/templates/user-service-deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
- name: {{ .Values.userService.name }}
+  name: {{ .Values.userService.name }}
 spec:
- replicas: {{ .Values.userService.replicaCount }}
- selector:
-   matchLabels:
-     app: {{ .Values.userService.name }}
- template:
-   metadata:
-     labels:
-       app: {{ .Values.userService.name }}
-   spec:
-     containers:
-     - name: {{ .Values.userService.name }}
-       image: "{{ .Values.userService.image.repository }}:{{ .Values.userService.image.tag }}"
-       ports:
-       - containerPort: 5000
-       env:
-       - name: PORT
-         value: "5000"
-       - name: DB_HOST
-         value: {{ .Values.database.host }}
-       - name: DB_PORT
-         value: {{ .Values.database.port | quote }}
-       - name: DB_NAME
-         value: {{ .Values.database.name }}
-       - name: DB_USER
-         value: {{ .Values.database.user }}
-       - name: DB_PASSWORD
-         value: {{ .Values.database.password }}
-       - name: JWT_SECRET
-         value: {{ .Values.jwt.secret }}
-       - name: JWT_EXPIRES_IN
-         value: {{ .Values.jwt.expiresIn }}
-       - name: DB_SSL
-         value: "true"
-       - name: DB_SSL_REJECT_UNAUTHORIZED
-         value: "false"
+  replicas: {{ .Values.userService.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.userService.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.userService.name }}
+    spec:
+      containers:
+      - name: {{ .Values.userService.name }}
+        image: "{{ .Values.userService.image.repository }}:{{ .Values.userService.image.tag }}"
+        ports:
+        - containerPort: 5000
+        env:
+        - name: PORT
+          value: "5000"
+        - name: DB_HOST
+          value: {{ .Values.database.host | quote }}
+        - name: DB_PORT
+          value: {{ .Values.database.port | quote }}
+        - name: DB_NAME
+          value: {{ .Values.database.name | quote }}
+        - name: DB_USER
+          value: {{ .Values.database.user | quote }}
+        - name: DB_PASSWORD
+          value: {{ .Values.database.password | quote }}
+        - name: JWT_SECRET
+          value: {{ .Values.jwt.secret | quote }}
+        - name: JWT_EXPIRES_IN
+          value: {{ .Values.jwt.expiresIn | quote }}
+        - name: DB_SSL
+          value: "true"
+        - name: DB_SSL_REJECT_UNAUTHORIZED
+          value: "false"

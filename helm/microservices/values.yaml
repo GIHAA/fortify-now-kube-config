@@ -24,9 +24,9 @@ userService:
     port: 5000
 
 database:
-  user: "17670"
-  password: "your_password"
-  host: "fortify-db"
+  user: "avnadmin"
+  password: "AVNS_lP0uW9A3_MC4As3h-NL"
+  host: "pg-122ba407-gihansudeeparandimal-f684.g.aivencloud.com"
   port: "17670"
   name: "defaultdb"
 
