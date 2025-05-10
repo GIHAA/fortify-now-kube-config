@@ -20,7 +20,7 @@ userService:
     repository: gihaa/fortify-now-auth-service
     tag: latest
   service:
-    type: LoadBalancer 
+    type: ClusterIP 
     port: 3001
     targetPort: 3001
     nodePort: 32000  
